@@ -12,5 +12,8 @@ Ubuntu based Webtop for AI Agents.
 
 ## Data Persistence
 This project uses bind mounts to ensure your data survives container restarts (`docker-compose down`).
-- `webtop-config/`: Persistent user profile, desktop settings, and internal configs.
-- `data/`: A dedicated directory for your work data, outputs, and artifacts.
+- `webtop-config/`: **Internal User Data**. This is mapped to the container's home directory (`/config`). All your desktop files, browser profiles, and app settings are saved here automatically.
+- `data/`: **Work Data**. A dedicated directory for external files, outputs, and artifacts.
+
+> [!NOTE]
+> Everything you do within the Webtop UI (creating files on the Desktop, changing wallpapers, etc.) is physically stored in your local `webtop-config/` folder.
