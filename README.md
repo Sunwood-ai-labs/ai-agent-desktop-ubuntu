@@ -1,6 +1,7 @@
-# ai-agent-desktop-ubuntu
-
-Ubuntu based Webtop for AI Agents.
+## Quick Start
+1.  Clone this repository.
+2.  Run `docker-compose up -d`. (This will build the custom image with Chrome and ffmpeg).
+3.  Access the desktop at `http://localhost:3001` or `https://localhost:3001`.
 
 ## Custom Initialization
 - `webtop-config/custom-cont-init.d/01-touch-pid.sh`: Ensures the `selkies` backend starts correctly by creating `/defaults/pid`.

@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   webtop:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    build: .
     container_name: webtop
     environment:
       - PUID=1000
