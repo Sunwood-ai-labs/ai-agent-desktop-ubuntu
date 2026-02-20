@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     ca-certificates \
     ffmpeg \
-    ddgr \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome
@@ -34,8 +33,7 @@ RUN mkdir -p /etc/opt/chrome/policies/managed \
 
 # Prepare Desktop Shortcuts templates
 RUN mkdir -p /defaults/Desktop \
-    && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Antigravity\nComment=Google Antigravity\nExec=antigravity\nIcon=antigravity\nCategories=Development;IDE;' > /defaults/Desktop/antigravity.desktop \
-    && echo '[Desktop Entry]\nVersion=1.0\nType=Link\nName=Google Search\nComment=Search the Web\nURL=https://www.google.com/\nIcon=google-chrome' > /defaults/Desktop/search.desktop
+    && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Antigravity\nComment=Google Antigravity\nExec=antigravity\nIcon=antigravity\nCategories=Development;IDE;' > /defaults/Desktop/antigravity.desktop
 
 # Finalize labels
 LABEL maintainer="Antigravity"
