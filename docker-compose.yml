@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: webtop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tokyo
+      - CUSTOM_USER=user
+      - PASSWORD=strong-pass
+    volumes:
+      - ./webtop-config:/config
+    ports:
+      - "127.0.0.1:3001:3001"
+    shm_size: "1gb"
+    restart: unless-stopped
