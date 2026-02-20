@@ -22,15 +22,6 @@ RUN apt-get update && apt-get install -y \
     antigravity \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure Google Chrome Policies (Homepage/Startup)
-RUN mkdir -p /etc/opt/chrome/policies/managed \
-    && echo '{ \
-    "HomepageLocation": "https://antigravity.google/", \
-    "HomepageIsNewTabPage": false, \
-    "RestoreOnStartup": 4, \
-    "RestoreOnStartupURLs": ["https://antigravity.google/"] \
-    }' > /etc/opt/chrome/policies/managed/antigravity_policy.json
-
 # Prepare Desktop Shortcuts templates
 RUN mkdir -p /defaults/Desktop \
     && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Antigravity\nComment=Google Antigravity\nExec=antigravity\nIcon=antigravity\nCategories=Development;IDE;' > /defaults/Desktop/antigravity.desktop
