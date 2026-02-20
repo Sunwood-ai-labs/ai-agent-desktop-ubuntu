@@ -4,3 +4,4 @@ webtop-config/*
 
 # Docker
 .env
+data/

@@ -12,6 +12,7 @@ services:
       - PASSWORD=strong-pass
     volumes:
       - ./webtop-config:/config
+      - ./data:/data
     ports:
       - "127.0.0.1:3001:3001"
     shm_size: "1gb"
