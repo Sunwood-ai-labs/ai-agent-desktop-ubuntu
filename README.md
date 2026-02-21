@@ -1,20 +1,104 @@
+# FUTODAMA
+
+**F**ully **U**nified **T**ooling and **O**rchestration for **D**esktop **A**gent **M**achine **A**rchitecture
+
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white)
+![XFCE](https://img.shields.io/badge/XFCE-2284F2?logo=xfce&logoColor=white)
+![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white)
+![ffmpeg](https://img.shields.io/badge/ffmpeg-007808?logo=ffmpeg&logoColor=white)
+![Antigravity](https://img.shields.io/badge/Antigravity-FF6B00?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiNGRjZCMDAiLz48L3N2Zz4=&logoColor=white)
+![noVNC](https://img.shields.io/badge/noVNC-000000?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE0IiB4PSIyIiB5PSI1IiByeD0iMiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==&logoColor=white)
+
+AIエージェント専用のPCワークスペース環境。Dockerコンテナで動作するUbuntu XFCEデスクトップで、AIエージェントがブラウザ操作・画面確認・ファイル管理などを自律的に行える環境を提供します。
+
+## 背景
+
+以前は既存のPC上でAIエージェントを動かしていたが、エージェントの機能拡張に伴い操作範囲が広がり、ホスト環境への影響リスクが高まった。そのため、エージェント専用の**隔離されたサンドボックス環境**としてこのコンテナを作成。
+
+**メリット：**
+- 🛡️ ホストPCへの影響を完全遮断
+- 🔒 エージェントの操作範囲を制御可能
+- 🔄 環境のリセット・再構築が容易
+- 📦 再現可能な環境をどこでも構築
+
+## 特徴
+
+- 🖥️ **ブラウザ経由でアクセス可能なデスクトップ環境**
+- 🤖 **AIエージェントによる自律操作を想定した設計**
+- 🌐 **Google Chrome** - Webブラウジング、スクレイピング、Webアプリ操作
+- 🎬 **ffmpeg** - 動画・音声処理
+- 🚀 **Antigravity** - AIエージェント用デスクトップアプリ
+
 ## Quick Start
-1.  Clone this repository.
-2.  Run `docker-compose up -d`. (This will build the custom image with Chrome and ffmpeg).
-3.  Access the desktop at `http://localhost:3001` or `https://localhost:3001`.
 
-## Custom Initialization
-- `webtop-config/custom-cont-init.d/01-touch-pid.sh`: Ensures the `selkies` backend starts correctly by creating `/defaults/pid`.
+1. リポジトリをクローン
+2. `docker-compose up -d` を実行（Chrome、ffmpeg含むカスタムイメージをビルド）
+3. `http://localhost:3333` でデスクトップにアクセス
+4. デスクトップ上のアイコンから Chrome や Antigravity を起動
 
-## SSL Configuration
-- `webtop-config/ssl/`: Contains certificates for Secure WebSockets (WSS). 
-  > [!IMPORTANT]
-  > These files are ignored by git because they contain private keys. If missing, the container will automatically generate self-signed certificates on startup.
+## 環境変数
 
-## Data Persistence
-This project uses bind mounts to ensure your data survives container restarts (`docker-compose down`).
-- `webtop-config/`: **Internal User Data**. This is mapped to the container's home directory (`/config`). All your desktop files, browser profiles, and app settings are saved here automatically.
-- `data/`: **Work Data**. A dedicated directory for external files, outputs, and artifacts.
+| 変数 | デフォルト値 | 説明 |
+|------|-------------|------|
+| `CUSTOM_USER` | `user` | ログインユーザー名 |
+| `PASSWORD` | `strong-pass` | ログインパスワード |
+| `TZ` | `Asia/Tokyo` | タイムゾーン |
 
-> [!NOTE]
-> Everything you do within the Webtop UI (creating files on the Desktop, changing wallpapers, etc.) is physically stored in your local `webtop-config/` folder.
+## ディレクトリ構成
+
+```
+.
+├── Dockerfile
+├── docker-compose.yml
+├── webtop-config/        # AIエージェントのホームディレクトリ（永続化）
+│   ├── Desktop/          # デスクトップ
+│   ├── .config/          # アプリ設定
+│   └── ...
+├── data/                 # 作業データ（永続化）
+└── webtop-config/ssl/    # SSL証明書（オプション）
+```
+
+## データ永続化
+
+- `webtop-config/` - AIエージェントのホームディレクトリ（`/config`）。デスクトップ上のファイル、ブラウザプロファイル、アプリ設定などが保存される
+- `data/` - 作業用データディレクトリ（`/data`）。外部ファイル、出力成果物などの置き場
+
+## SSL設定
+
+`webtop-config/ssl/` に証明書を配置すると WSS（Secure WebSockets）が有効になります。
+> [!IMPORTANT]
+> 証明書ファイルは秘密鍵を含むため git で管理されません。未設定の場合は起動時に自己署名証明書が自動生成されます。
+
+## カスタム初期化スクリプト
+
+- `webtop-config/custom-cont-init.d/01-touch-pid.sh` - selkies バックエンドの正常起動を保証
+
+## AIエージェントからの利用
+
+AIエージェントは以下の方法でこの環境を利用できます：
+
+1. **ブラウザ操作** - Cinderella Browser API 経由で Chrome を操作
+2. **画面確認** - noVNC や スクリーンショットAPIでデスクトップ状態を確認
+3. **ファイル管理** - `data/` ディレクトリ経由でファイルをやり取り
+
+## セキュリティ
+
+- ポートは `127.0.0.1:3333` にバインド（外部から直接アクセス不可）
+- コンテナ内では Chrome は `--no-sandbox` モードで動作（コンテナ環境向け）
+
+### Chrome サンドボックス設定
+
+Dockerコンテナ内ではChromeのサンドボックス機能が制限されるため、以下の設定で `--no-sandbox` を自動付与しています：
+
+| 設定箇所 | 説明 |
+|---------|------|
+| `/usr/local/bin/google-chrome-launch` | Chrome起動用ラッパースクリプト。`--no-sandbox --disable-gpu` を自動付与 |
+| `/usr/share/applications/google-chrome.desktop` | システムのdesktopファイルを修正し、ラッパーを使用 |
+| `/usr/share/xfce4/helpers/google-chrome.desktop` | XFCEヘルパーを修正。`xdg-open`（Antigravityのリンク等）が正しく動作 |
+| `/config/Desktop/google-chrome.desktop` | デスクトップショートカットもラッパーを使用 |
+
+これにより、以下のすべてのケースでChromeが正常に起動します：
+- デスクトップのChromeアイコンをクリック
+- Antigravityから外部リンクを開く
+- `xdg-open` コマンドでURLを開く
