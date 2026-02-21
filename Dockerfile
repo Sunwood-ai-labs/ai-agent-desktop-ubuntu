@@ -28,8 +28,14 @@ RUN printf '#!/usr/bin/env bash\nexec antigravity --no-sandbox "$@"\n' > /usr/lo
     && chmod +x /usr/local/bin/antigravity-launch
 
 # Chrome launcher with --no-sandbox for container environments
-RUN printf '#!/usr/bin/env bash\nexec /usr/bin/google-chrome-stable --no-sandbox --disable-gpu "$@"\n' > /usr/local/bin/google-chrome-launch \
+RUN printf '#!/usr/bin/env bash\nexec /usr/bin/google-chrome-stable --no-sandbox --disable-gpu --download.default_directory=/config/Downloads "$@"\n' > /usr/local/bin/google-chrome-launch \
     && chmod +x /usr/local/bin/google-chrome-launch
+
+# Override /usr/bin/google-chrome to always use --no-sandbox and download directory (for Antigravity)
+RUN mv /usr/bin/google-chrome-stable /usr/bin/google-chrome-stable.real \
+    && printf '#!/usr/bin/env bash\nexec /usr/bin/google-chrome-stable.real --no-sandbox --download.default_directory=/config/Downloads "$@"\n' > /usr/bin/google-chrome-stable \
+    && chmod +x /usr/bin/google-chrome-stable \
+    && ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome
 
 # Override system google-chrome.desktop to use --no-sandbox (for xdg-open/Antigravity)
 RUN sed -i 's|Exec=/usr/bin/google-chrome-stable|Exec=/usr/local/bin/google-chrome-launch|g' /usr/share/applications/google-chrome.desktop
