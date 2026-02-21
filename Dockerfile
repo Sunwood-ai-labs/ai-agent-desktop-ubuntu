@@ -185,6 +185,13 @@ fi
 BASHRC
   echo "Added color settings to $BASHRC_FILE"
 fi
+
+# Ensure .profile sources .bashrc for SSH login shells
+PROFILE_FILE="/config/.profile"
+if ! grep -q "source ~/.bashrc" "$PROFILE_FILE" 2>/dev/null; then
+  echo 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> "$PROFILE_FILE"
+  echo "Added bashrc source to $PROFILE_FILE"
+fi
 EOF
 RUN chmod +x /custom-cont-init.d/10-sshd-setup.sh
 
