@@ -156,6 +156,35 @@ s6-setuidgid abc chmod 644 "$USER_SSH_DIR/id_ed25519.pub"
 echo "SSH server configured successfully"
 echo "Private key: $USER_SSH_DIR/id_ed25519"
 echo "Public key:  $USER_SSH_DIR/id_ed25519.pub"
+
+# Setup colorful bashrc for SSH sessions
+BASHRC_FILE="/config/.bashrc"
+if ! grep -q "# FUTODAMA Color Settings" "$BASHRC_FILE" 2>/dev/null; then
+  cat >> "$BASHRC_FILE" << 'BASHRC'
+# FUTODAMA Color Settings
+export TERM=xterm-256color
+
+# Colorful PS1 prompt
+export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# Enable ls colors
+alias ls='ls --color=auto'
+alias ll='ls -alF --color=auto'
+alias la='ls -A --color=auto'
+alias l='ls -CF --color=auto'
+
+# Enable grep colors
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# dircolors
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+fi
+BASHRC
+  echo "Added color settings to $BASHRC_FILE"
+fi
 EOF
 RUN chmod +x /custom-cont-init.d/10-sshd-setup.sh
 
