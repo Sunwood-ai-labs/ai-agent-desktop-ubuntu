@@ -102,9 +102,18 @@ RUN cat <<'EOF' > /custom-cont-init.d/10-sshd-setup.sh
 #!/usr/bin/with-contenv bash
 set -e
 
-# Generate host keys if missing
-if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+SSH_DIR="/config/ssh"
+USER_SSH_DIR="/config/.ssh"
+
+# Setup persistent host keys
+mkdir -p "$SSH_DIR"
+if [ ! -f "$SSH_DIR/ssh_host_rsa_key" ]; then
   ssh-keygen -A
+  cp /etc/ssh/ssh_host_* "$SSH_DIR/"
+  echo "Generated new SSH host keys in $SSH_DIR"
+else
+  cp "$SSH_DIR"/ssh_host_* /etc/ssh/
+  echo "Restored SSH host keys from $SSH_DIR"
 fi
 
 # Ensure SSH run directory exists
@@ -115,7 +124,16 @@ if [ -n "$PASSWORD" ]; then
   echo "abc:$PASSWORD" | chpasswd
 fi
 
+# Setup user authorized_keys
+mkdir -p "$USER_SSH_DIR"
+if [ -f "$USER_SSH_DIR/authorized_keys" ]; then
+  chmod 600 "$USER_SSH_DIR/authorized_keys"
+  chown -R abc:abc "$USER_SSH_DIR"
+  echo "Loaded authorized_keys from $USER_SSH_DIR"
+fi
+
 echo "SSH server configured successfully"
+echo "Put your public key in: $USER_SSH_DIR/authorized_keys"
 EOF
 RUN chmod +x /custom-cont-init.d/10-sshd-setup.sh
 
