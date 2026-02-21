@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/header.jpeg" alt="FUTODAMA" width="500">
+  <img src="assets/header.jpeg" alt="FUTODAMA" width="100%">
 
 # FUTODAMA
 
