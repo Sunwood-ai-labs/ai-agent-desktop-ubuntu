@@ -7,6 +7,12 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     ffmpeg \
     openssh-server \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js (for Claude Code and Codex)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome
@@ -22,6 +28,12 @@ RUN apt-get update && apt-get install -y \
     google-chrome-stable \
     antigravity \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# Install OpenAI Codex CLI
+RUN npm install -g @openai/codex
 
 # Launcher for container environments where Chromium sandbox namespaces are restricted.
 RUN printf '#!/usr/bin/env bash\nexec antigravity --no-sandbox "$@"\n' > /usr/local/bin/antigravity-launch \
@@ -61,7 +73,15 @@ if [ ! -f "$DESKTOP_DIR/google-chrome.desktop" ]; then
   cp /defaults/Desktop/google-chrome.desktop "$DESKTOP_DIR/google-chrome.desktop"
 fi
 
-for launcher in "$DESKTOP_DIR/antigravity.desktop" "$DESKTOP_DIR/google-chrome.desktop"; do
+if [ ! -f "$DESKTOP_DIR/claude-code.desktop" ]; then
+  cp /defaults/Desktop/claude-code.desktop "$DESKTOP_DIR/claude-code.desktop"
+fi
+
+if [ ! -f "$DESKTOP_DIR/codex.desktop" ]; then
+  cp /defaults/Desktop/codex.desktop "$DESKTOP_DIR/codex.desktop"
+fi
+
+for launcher in "$DESKTOP_DIR/antigravity.desktop" "$DESKTOP_DIR/google-chrome.desktop" "$DESKTOP_DIR/claude-code.desktop" "$DESKTOP_DIR/codex.desktop"; do
   if [ -f "$launcher" ]; then
     chown abc:abc "$launcher"
     chmod 755 "$launcher"
@@ -82,7 +102,7 @@ if ! command -v s6-setuidgid >/dev/null 2>&1; then
   exit 0
 fi
 
-s6-setuidgid abc sh -lc '
+s6-setuidgid abc bash -lc '
   export HOME=/config
   xdg-settings set default-web-browser google-chrome.desktop
   xdg-mime default google-chrome.desktop x-scheme-handler/http
@@ -95,7 +115,9 @@ RUN chmod +x /custom-cont-init.d/40-default-browser-chrome.sh
 # Prepare Desktop Shortcuts templates
 RUN mkdir -p /defaults/Desktop \
     && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Antigravity\nComment=Google Antigravity\nExec=/usr/local/bin/antigravity-launch\nIcon=antigravity\nCategories=Development;IDE;' > /defaults/Desktop/antigravity.desktop \
-    && echo '[Desktop Entry]\nVersion=1.0\nName=Google Chrome\nGenericName=Web Browser\nComment=Access the Internet\nExec=/usr/local/bin/google-chrome-launch %U\nStartupNotify=true\nTerminal=false\nIcon=google-chrome\nType=Application\nCategories=Network;WebBrowser;\nMimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;' > /defaults/Desktop/google-chrome.desktop
+    && echo '[Desktop Entry]\nVersion=1.0\nName=Google Chrome\nGenericName=Web Browser\nComment=Access the Internet\nExec=/usr/local/bin/google-chrome-launch %U\nStartupNotify=true\nTerminal=false\nIcon=google-chrome\nType=Application\nCategories=Network;WebBrowser;\nMimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;' > /defaults/Desktop/google-chrome.desktop \
+    && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Claude Code\nComment=Anthropic Claude Code CLI\nExec=xfce4-terminal -e "claude"\nIcon=utilities-terminal\nCategories=Development;ConsoleOnly;' > /defaults/Desktop/claude-code.desktop \
+    && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Codex\nComment=OpenAI Codex CLI\nExec=xfce4-terminal -e "codex"\nIcon=utilities-terminal\nCategories=Development;ConsoleOnly;' > /defaults/Desktop/codex.desktop
 
 # SSH server setup
 RUN mkdir -p /var/run/sshd \
@@ -194,8 +216,8 @@ fi
 
 # Ensure .profile sources .bashrc for SSH login shells
 PROFILE_FILE="/config/.profile"
-if ! grep -q "source ~/.bashrc" "$PROFILE_FILE" 2>/dev/null; then
-  echo 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> "$PROFILE_FILE"
+if ! grep -q "\. ~/.bashrc" "$PROFILE_FILE" 2>/dev/null; then
+  echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> "$PROFILE_FILE"
   echo "Added bashrc source to $PROFILE_FILE"
 fi
 EOF
