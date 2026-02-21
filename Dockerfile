@@ -124,16 +124,36 @@ if [ -n "$PASSWORD" ]; then
   echo "abc:$PASSWORD" | chpasswd
 fi
 
-# Setup user authorized_keys
+# Setup user SSH directory
 mkdir -p "$USER_SSH_DIR"
-if [ -f "$USER_SSH_DIR/authorized_keys" ]; then
-  chmod 600 "$USER_SSH_DIR/authorized_keys"
-  chown -R abc:abc "$USER_SSH_DIR"
-  echo "Loaded authorized_keys from $USER_SSH_DIR"
+
+# Generate keypair if not exists
+if [ ! -f "$USER_SSH_DIR/id_ed25519" ]; then
+  echo "Generating new SSH keypair for abc user..."
+  s6-setuidgid abc ssh-keygen -t ed25519 -f "$USER_SSH_DIR/id_ed25519" -N "" -C "abc@webtop"
+  echo "Generated: $USER_SSH_DIR/id_ed25519"
 fi
 
+# Setup authorized_keys (append generated pubkey if missing)
+if [ ! -f "$USER_SSH_DIR/authorized_keys" ]; then
+  touch "$USER_SSH_DIR/authorized_keys"
+fi
+
+PUBKEY=$(cat "$USER_SSH_DIR/id_ed25519.pub")
+if ! grep -q "$PUBKEY" "$USER_SSH_DIR/authorized_keys" 2>/dev/null; then
+  echo "$PUBKEY" >> "$USER_SSH_DIR/authorized_keys"
+  echo "Added generated pubkey to authorized_keys"
+fi
+
+# Fix permissions
+chmod 700 "$USER_SSH_DIR"
+chmod 600 "$USER_SSH_DIR/id_ed25519" "$USER_SSH_DIR/authorized_keys"
+chmod 644 "$USER_SSH_DIR/id_ed25519.pub"
+chown -R abc:abc "$USER_SSH_DIR"
+
 echo "SSH server configured successfully"
-echo "Put your public key in: $USER_SSH_DIR/authorized_keys"
+echo "Private key: $USER_SSH_DIR/id_ed25519"
+echo "Public key:  $USER_SSH_DIR/id_ed25519.pub"
 EOF
 RUN chmod +x /custom-cont-init.d/10-sshd-setup.sh
 
