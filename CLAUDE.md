@@ -1,1 +1,1 @@
-@AGENT.md に従って
+@AGENTS.md に従って
