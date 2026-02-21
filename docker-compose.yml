@@ -15,5 +15,6 @@ services:
       - ./data:/data
     ports:
       - "127.0.0.1:3333:3001"
+      - "127.0.0.1:2222:22"
     shm_size: "1gb"
     restart: unless-stopped

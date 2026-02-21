@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     ca-certificates \
     ffmpeg \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome
@@ -89,6 +90,45 @@ RUN chmod +x /custom-cont-init.d/40-default-browser-chrome.sh
 RUN mkdir -p /defaults/Desktop \
     && echo '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Antigravity\nComment=Google Antigravity\nExec=/usr/local/bin/antigravity-launch\nIcon=antigravity\nCategories=Development;IDE;' > /defaults/Desktop/antigravity.desktop \
     && echo '[Desktop Entry]\nVersion=1.0\nName=Google Chrome\nGenericName=Web Browser\nComment=Access the Internet\nExec=/usr/local/bin/google-chrome-launch %U\nStartupNotify=true\nTerminal=false\nIcon=google-chrome\nType=Application\nCategories=Network;WebBrowser;\nMimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;' > /defaults/Desktop/google-chrome.desktop
+
+# SSH server setup
+RUN mkdir -p /var/run/sshd \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+# SSH init script for s6-overlay
+RUN cat <<'EOF' > /custom-cont-init.d/10-sshd-setup.sh
+#!/usr/bin/with-contenv bash
+set -e
+
+# Generate host keys if missing
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+  ssh-keygen -A
+fi
+
+# Ensure SSH run directory exists
+mkdir -p /var/run/sshd
+
+# Set password for abc user (same as CUSTOM_USER password)
+if [ -n "$PASSWORD" ]; then
+  echo "abc:$PASSWORD" | chpasswd
+fi
+
+echo "SSH server configured successfully"
+EOF
+RUN chmod +x /custom-cont-init.d/10-sshd-setup.sh
+
+# SSH service definition for s6-overlay
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/sshd \
+    && echo "longrun" > /etc/s6-overlay/s6-rc.d/sshd/type \
+    && cat <<'EOF' > /etc/s6-overlay/s6-rc.d/sshd/run
+#!/usr/bin/with-contenv bash
+exec /usr/sbin/sshd -D -e
+EOF
+RUN chmod +x /etc/s6-overlay/s6-rc.d/sshd/run \
+    && mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d \
+    && touch /etc/s6-overlay/s6-rc.d/user/contents.d/sshd
 
 # Finalize labels
 LABEL maintainer="FUTODAMA"
