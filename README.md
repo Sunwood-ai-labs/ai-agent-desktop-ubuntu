@@ -1,14 +1,19 @@
+<div align="center">
+  <img src="assets/header.jpeg" alt="FUTODAMA" width="500">
+
 # FUTODAMA
 
 **F**ully **U**nified **T**ooling and **O**rchestration for **D**esktop **A**gent **M**achine **A**rchitecture
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white)
-![XFCE](https://img.shields.io/badge/XFCE-2284F2?logo=xfce&logoColor=white)
-![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white)
-![ffmpeg](https://img.shields.io/badge/ffmpeg-007808?logo=ffmpeg&logoColor=white)
-![Antigravity](https://img.shields.io/badge/Antigravity-FF6B00?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiNGRjZCMDAiLz48L3N2Zz4=&logoColor=white)
-![noVNC](https://img.shields.io/badge/noVNC-000000?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE0IiB4PSIyIiB5PSI1IiByeD0iMiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==&logoColor=white)
+<img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
+<img src="https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white" alt="Ubuntu">
+<img src="https://img.shields.io/badge/XFCE-2284F2?logo=xfce&logoColor=white" alt="XFCE">
+<img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome">
+<img src="https://img.shields.io/badge/ffmpeg-007808?logo=ffmpeg&logoColor=white" alt="ffmpeg">
+<img src="https://img.shields.io/badge/noVNC-000000?logoColor=white" alt="noVNC">
+</div>
+
+---
 
 AIエージェント専用のPCワークスペース環境。Dockerコンテナで動作するUbuntu XFCEデスクトップで、AIエージェントがブラウザ操作・画面確認・ファイル管理などを自律的に行える環境を提供します。
 
